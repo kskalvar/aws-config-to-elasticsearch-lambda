@@ -1,7 +1,7 @@
 AWS Config Snapshots to AWS Elasticsearch using Lambda
 ======================================================
 
-This solution shows how to automate the ingestion of your AWS Config snapshots into the ElasticSearch/Logstash/Kibana (ELK) stack for searching and mapping your AWS environments.  We'll be using a Lambda function which will automatically be fired when a new file is upload to the S3 bucket AWS Config is using to store Snapshot files.  This readme updates an article "How to Analyze AWS Config Snapshots with ElasticSearch and Kibana by Vladimir Budilov" referenced below and provides a more basic step by step process.
+This solution shows how to automate the ingestion of your AWS Config snapshots into the ElasticSearch/Logstash/Kibana (ELK) stack for searching and mapping your AWS environments.  We'll be using a Lambda function which will automatically be fired when a new file is uploaded to the S3 bucket used by AWS Config.  This readme updates an article "How to Analyze AWS Config Snapshots with ElasticSearch and Kibana by Vladimir Budilov" referenced below and provides a more basic step by step process.
 
 ## Configure AWS Config Service
 
@@ -131,30 +131,34 @@ Select "S3"
 ```
 
 Configure triggers Section
+```
 Event type:  PUT
 Enable trigger: checked
-Add
+```
+Add  
 Save
 
 
-Designer section
+Designer section  
 Highlight "amp-sight-lambda" 
 
-Function code Section
+Function code Section  
 Code entry type pull-down
 ```
 Upload a .ZIP file
 ```
 Upload
 
-Update lambda_funtion with ```<Endpoint URL>``` from AWS Elasticsearch Resources Created
+Update lambda_funtion with ```<Endpoint URL>``` from "AWS Elasticsearch Resources Created"
 ```
 destination=<Endpoint URL>
 ```
 Save
 
-Basic settings Section
+Basic settings Section  
+```
 Timeout: 3 min 0 sec
+```
 Save
 
 ## Configure Kibana

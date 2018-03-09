@@ -147,6 +147,9 @@ Code entry type pull-down
 Upload a .ZIP file
 ```
 Upload
+```
+deployment/aws-config-lambda.zip
+```
 
 Update lambda_funtion with ```<Endpoint URL>``` from "AWS Elasticsearch Resources Created"
 ```

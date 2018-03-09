@@ -96,7 +96,7 @@ Confirm
 
 From the AWS Elasticsearch Console you will see ```aws-config-es``` domain configuration status.  "Configuration state” shows the status of the just created domain and initially will display “Loading”.  Once it shows “Active” the domain will be ready to access.  Node configuration took 12 minutes to become active for this example.  
 
-Drill down to the aws-config-es domain and select the "Overview" tab.  
+Drill down to the ```aws-config-es``` domain and select the "Overview" tab.  
 
 Of specific interest for this task are:  
 

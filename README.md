@@ -104,6 +104,7 @@ Of specific interest for this task are:
 "Endpoint: <Endpoint URL>"
 "Kibana: <Kibana URL>"
 ```
+
 ## Configure AWS Lambda Function
 
 Use the AWS Console to configure the AWS Lambda function. The Lambda function will be used to import AWS Config Snapshots into Elasticsearch automatically.  This is a step by step process.
@@ -150,6 +151,7 @@ Upload
 ```
 deployment/aws-config-lambda.zip
 ```
+Save
 
 Update lambda_funtion with ```<Endpoint URL>``` from "AWS Elasticsearch Resources Created"
 ```
@@ -163,17 +165,43 @@ Timeout: 3 min 0 sec
 ```
 Save
 
+#### AWS Lambda Resources Created
+S3 Bucket ```config-bucket-<id>``` 
+```
+Properties/Events
+<id>
+Events: Put
+Send to: Lambda Function
+Lambda: aws-config-lambda
+```   
+IAM Roles  
+```
+aws-config-lambda-role
+```    
+IAM Policies  
+```
+Customer managed:
+AWSLambdaS3ExecutionRole-<id>
+AWSLambdaBasicExecutionRole-<id>
+```  
+
 #### Test Lambda Function
 AWS Lambda provides a Test harness which can be found in the upper right hand corner of the "Configuration tab" of the function.  There's a little easier way to test the function by using the AWS S3 Console.  Simply locate an AWS Config Snapshot file on S3, download it using the AWS S3 Console and simply upload it again to the same location.  This will change the timestamp and fire the lambda rule.
 
 Example:  
+```
 cd config-bucket-754487812300/AWSLogs/754487812300/Config/us-east-1/2018/3/9/ConfigSnapshot
+```
 
 download  
+```
 754487812300_Config_us-east-1_ConfigSnapshot_20180309T130612Z_6cff9e2b-c6a1-44c2-9437-0cb038e5e09d.json.gz
+```
 
 upload to same location:  
+```
 754487812300_Config_us-east-1_ConfigSnapshot_20180309T130612Z_6cff9e2b-c6a1-44c2-9437-0cb038e5e09d.json.gz
+```
 
 Additionally you can use AWS Cloudwatch Console to monitor and debug activity from the lambda function
 

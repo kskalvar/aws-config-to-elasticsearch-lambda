@@ -172,7 +172,7 @@ download
 upload to same location:  
 754487812300_Config_us-east-1_ConfigSnapshot_20180309T130612Z_6cff9e2b-c6a1-44c2-9437-0cb038e5e09d.json.gz
 
-Additionally you can use AWS Cloudwatch Console to monitor and debug activity from the lambda fucntion
+Additionally you can use AWS Cloudwatch Console to monitor and debug activity from the lambda function
 
 
 ## Configure Kibana

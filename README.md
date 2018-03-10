@@ -115,11 +115,13 @@ Create a function
 #### Create function
 ```
 Author from scratch
-	Name: aws-config-lambda
-	Runtime:  Python 2.7
-	Role: Create new roll from template(s)
-	Role name: aws-config-lambda-role
-	Policy templates: S3 object read-only permissions
+```
+```
+Name: aws-config-lambda
+Runtime:  Python 2.7
+Role: Create new roll from template(s)
+Role name: aws-config-lambda-role
+Policy templates: S3 object read-only permissions
 ```  
 Create function
 

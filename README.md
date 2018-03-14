@@ -36,7 +36,7 @@ Confirm
 ### AWS Resources Created
 S3 Bucket  
 ```
-config-bucket-<id>
+config-bucket-<AWS Account Id>
 ```   
 IAM Roles  
 ```

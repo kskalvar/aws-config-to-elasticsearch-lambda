@@ -149,7 +149,8 @@ Code entry type pull-down
 ```
 Upload a .ZIP file
 ```
-Upload
+Upload  
+See eclipse-pydev-aws-config-lambda github project for instructions on how to build the deployment archive  
 ```
 deployment/aws-config-lambda.zip
 ```

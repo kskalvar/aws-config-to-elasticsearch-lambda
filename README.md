@@ -142,7 +142,7 @@ Add
 Save
 
 
-Designer section Select "amp-sight-lambda" 
+Designer section Select "aws-config-lambda" 
 
 Function code Section  
 Code entry type pull-down
@@ -155,9 +155,10 @@ deployment/aws-config-lambda.zip
 ```
 Save
 
-Update lambda_funtion with ```<Endpoint URL>``` from "AWS Elasticsearch Resources Created"
+Environment variables  
+See ```<Endpoint URL>``` from "AWS Elasticsearch Resources Created"
 ```
-destination=<Endpoint URL>
+aws_config_es_endpoint <Endpoint URL>
 ```
 Save
 

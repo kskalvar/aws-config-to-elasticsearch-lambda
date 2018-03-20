@@ -157,7 +157,10 @@ deployment/aws-config-lambda.zip
 Save
 
 Environment variables Section  
-Use ```<Endpoint URL>``` from "AWS Elasticsearch Resources Created" 
+Use ```<Endpoint URL>``` from "AWS Elasticsearch Resources Created"
+```
+Example: https://search-aws-config-es-rylg5tz5l7j77uocyuzy5gjcu4.us-east-1.es.amazonaws.com
+```
 ```
 aws_config_es_endpoint <Endpoint URL>
 ```

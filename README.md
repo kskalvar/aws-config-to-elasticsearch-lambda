@@ -173,7 +173,7 @@ Timeout: 3 min 0 sec
 Save
 
 #### AWS Lambda Resources Created
-S3 Bucket ```config-bucket-<id>``` 
+S3 Bucket ```config-bucket-<AWS::AccountId>``` 
 ```
 Properties/Events
 <id>

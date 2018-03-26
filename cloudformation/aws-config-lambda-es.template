@@ -1,0 +1,234 @@
+{
+  "AWSTemplateFormatVersion" : "2010-09-09",
+  "Description" : "AWS CloudFormation for AWS Config",
+  "Parameters" : {
+    "S3DeploymentBucket" : {
+      "Description" : "S3 Lambda Deployment Bucket",
+      "Type" : "String"
+    },
+    "S3DeploymentBucketKey" : {
+      "Description" : "S3 Lambda Deployment Bucket Key",
+      "Type" : "String"
+    }
+  },
+  "Resources" : {
+    "ElasticsearchDomain" : {
+      "Type" : "AWS::Elasticsearch::Domain",
+      "Properties" : {
+        "DomainName" : "aws-config-es",
+        "ElasticsearchVersion" : "5.5",
+        "ElasticsearchClusterConfig" : {
+          "InstanceCount" : "1",
+          "InstanceType" : "t2.small.elasticsearch"
+        },
+        "EBSOptions" : {
+          "EBSEnabled" : "true",
+          "Iops" : 0,
+          "VolumeSize" : 10,
+          "VolumeType" : "standard"
+        },
+        "SnapshotOptions" : {
+          "AutomatedSnapshotStartHour" : "0"
+        },
+        "AccessPolicies" : {
+          "Version" : "2012-10-17",
+          "Statement" : [ {
+            "Effect" : "Allow",
+            "Principal" : {
+              "AWS" : [ "*" ]
+            },
+            "Action" : [ "es:*" ],
+            "Resource" : "arn:aws:es:*:*:domain/aws-config-es/*"
+          } ]
+        },
+        "AdvancedOptions" : {
+          "rest.action.multi.allow_explicit_index" : "true"
+        }
+      }
+    },
+    "ConfigBucket" : {
+      "DependsOn" : [ "ConfigLambda" ],
+      "Type" : "AWS::S3::Bucket",
+      "Properties" : {
+        "BucketName" : {
+          "Fn::Join" : [ "", [ "config-bucket-", {
+            "Ref" : "AWS::AccountId"
+          } ] ]
+        },
+        "NotificationConfiguration" : {
+          "LambdaConfigurations" : [ {
+            "Event" : "s3:ObjectCreated:*",
+            "Function" : {
+              "Fn::GetAtt" : [ "ConfigLambda", "Arn" ]
+            }
+          } ]
+        }
+      }
+    },
+    "ConfigRecorder" : {
+      "Type" : "AWS::Config::ConfigurationRecorder",
+      "Properties" : {
+        "Name" : "default",
+        "RoleARN" : {
+          "Fn::GetAtt" : [ "ConfigRole", "Arn" ]
+        }
+      }
+    },
+    "DeliveryChannel" : {
+      "Type" : "AWS::Config::DeliveryChannel",
+      "Properties" : {
+        "ConfigSnapshotDeliveryProperties" : {
+          "DeliveryFrequency" : "One_Hour"
+        },
+        "S3BucketName" : {
+          "Ref" : "ConfigBucket"
+        }
+      }
+    },
+    "ConfigRole" : {
+      "Type" : "AWS::IAM::Role",
+      "Properties" : {
+        "AssumeRolePolicyDocument" : {
+          "Version" : "2012-10-17",
+          "Statement" : [ {
+            "Effect" : "Allow",
+            "Principal" : {
+              "Service" : [ "config.amazonaws.com" ]
+            },
+            "Action" : [ "sts:AssumeRole" ]
+          } ]
+        },
+        "ManagedPolicyArns" : [ "arn:aws:iam::aws:policy/service-role/AWSConfigRole" ],
+        "Policies" : [ {
+          "PolicyName" : "root",
+          "PolicyDocument" : {
+            "Version" : "2012-10-17",
+            "Statement" : [ {
+              "Effect" : "Allow",
+              "Action" : "s3:GetBucketAcl",
+              "Resource" : {
+                "Fn::Join" : [ "", [ "arn:aws:s3:::", {
+                  "Ref" : "ConfigBucket"
+                } ] ]
+              }
+            }, {
+              "Effect" : "Allow",
+              "Action" : "s3:PutObject",
+              "Resource" : {
+                "Fn::Join" : [ "", [ "arn:aws:s3:::", {
+                  "Ref" : "ConfigBucket"
+                }, "/AWSLogs/", {
+                  "Ref" : "AWS::AccountId"
+                }, "/*" ] ]
+              },
+              "Condition" : {
+                "StringEquals" : {
+                  "s3:x-amz-acl" : "bucket-owner-full-control"
+                }
+              }
+            } ]
+          }
+        } ]
+      }
+    },
+    "ConfigLambda" : {
+      "DependsOn" : [ "LambdaExecutionRole", "ElasticsearchDomain" ],
+      "Type" : "AWS::Lambda::Function",
+      "Properties" : {
+        "Handler" : "lambda_function.lambda_handler",
+        "FunctionName" : "aws-config-lambda",
+        "Role" : {
+          "Fn::GetAtt" : [ "LambdaExecutionRole", "Arn" ]
+        },
+        "Code" : {
+          "S3Bucket" : {
+            "Ref" : "S3DeploymentBucket"
+          },
+          "S3Key" : {
+            "Ref" : "S3DeploymentBucketKey"
+          }
+        },
+        "Runtime" : "python2.7",
+        "Timeout" : "180",
+        "Environment" : {
+          "Variables" : {
+            "aws_config_es_endpoint" : {
+              "Fn::Join" : [ "", [ "https://", {
+                "Fn::GetAtt" : [ "ElasticsearchDomain", "DomainEndpoint" ]
+              } ] ]
+            }
+          }
+        }
+      }
+    },
+    "LambdaExecutionRole" : {
+      "Type" : "AWS::IAM::Role",
+      "Properties" : {
+        "AssumeRolePolicyDocument" : {
+          "Version" : "2012-10-17",
+          "Statement" : [ {
+            "Effect" : "Allow",
+            "Principal" : {
+              "Service" : [ "lambda.amazonaws.com" ]
+            },
+            "Action" : [ "sts:AssumeRole" ]
+          } ]
+        },
+        "Policies" : [ {
+          "PolicyName" : "basic-execution-role",
+          "PolicyDocument" : {
+            "Version" : "2012-10-17",
+            "Statement" : [ {
+              "Effect" : "Allow",
+              "Action" : [ "logs:*" ],
+              "Resource" : "arn:aws:logs:*:*:*"
+            }, {
+              "Effect" : "Allow",
+              "Action" : [ "s3:GetObject" ],
+              "Resource" : "arn:aws:s3:::*"
+            } ]
+          }
+        } ]
+      }
+    },
+    "LambdaAccessPermissions" : {
+      "DependsOn" : [ "ConfigLambda" ],
+      "Type" : "AWS::Lambda::Permission",
+      "Properties" : {
+        "Action" : "lambda:InvokeFunction",
+        "FunctionName" : {
+          "Fn::GetAtt" : [ "ConfigLambda", "Arn" ]
+        },
+        "Principal" : "s3.amazonaws.com",
+        "SourceArn" : {
+          "Fn::Sub" : [ "arn:aws:s3:::${Domain}", {
+            "Domain" : {
+              "Fn::Join" : [ "", [ "config-bucket-", {
+                "Ref" : "AWS::AccountId"
+              } ] ]
+            }
+          } ]
+        }
+      }
+    }
+  },
+  "Outputs" : {
+    "ConfigBucket" : {
+      "Value" : {
+        "Fn::GetAtt" : [ "ConfigBucket", "DomainName" ]
+      }
+    },
+    "DomainEndpoint" : {
+      "Value" : {
+        "Fn::GetAtt" : [ "ElasticsearchDomain", "DomainEndpoint" ]
+      }
+    },
+    "Kibana" : {
+      "Value" : {
+        "Fn::Join" : [ "", [ "https://", {
+          "Fn::GetAtt" : [ "ElasticsearchDomain", "DomainEndpoint" ]
+        }, "/_plugin/kibana/" ] ]
+      }
+    }
+  }
+}

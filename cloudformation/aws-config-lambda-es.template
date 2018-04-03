@@ -4,11 +4,13 @@
   "Parameters" : {
     "S3DeploymentBucket" : {
       "Description" : "S3 Lambda Deployment Bucket",
-      "Type" : "String"
+      "Type" : "String",
+      "Default": "aws-config-lambda-deployment"
     },
     "S3DeploymentBucketKey" : {
       "Description" : "S3 Lambda Deployment Bucket Key",
-      "Type" : "String"
+      "Type" : "String",
+      "Default": "aws-config-lambda.zip"
     }
   },
   "Resources" : {
